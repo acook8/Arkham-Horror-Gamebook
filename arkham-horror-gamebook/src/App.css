@@ -3,7 +3,7 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;  /* Reduced padding for mobile */
   text-align: center;
   background-color: #1a1814;
   color: #d4c4a8;
@@ -107,13 +107,15 @@ ul {
   padding: 1em;
   transition: all 0.3s ease;
   position: relative;
-  cursor: help;
+  cursor: default;  /* Changed from help to default */
+  z-index: 1;  /* Base z-index for stat cards */
 }
 
 .stats-grid li:hover {
   background: rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2;  /* Raise hovered stat above others */
 }
 
 .stats-grid li[data-health-penalty="true"] {
@@ -124,6 +126,10 @@ ul {
 .stats-grid li[data-sanity-penalty="true"] {
   border-color: #9b59b6;
   box-shadow: 0 0 10px rgba(155, 89, 182, 0.2);
+}
+
+.stats-grid li.show-tooltip {
+  z-index: 1001; /* Ensure the container with active tooltip is above everything */
 }
 
 .stat-name {
@@ -156,6 +162,9 @@ ul {
   display: flex;
   gap: 0.5em;
   margin-top: 0.5em;
+  position: relative;
+  z-index: 1; /* Lower z-index so it doesn't overlap tooltips */
+  pointer-events: auto;
 }
 
 .stat-buttons button {
@@ -581,13 +590,18 @@ svg circle {
   line-height: 1.4;
 }
 
+@keyframes tooltipFadeOut {
+  from { opacity: 1; visibility: visible; }
+  to { opacity: 0; visibility: hidden; }
+}
+
 .tooltip {
   position: absolute;
-  bottom: calc(100% + 10px);
+  top: -10px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -100%);
   padding: 0.8em;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
   border: 1px solid #c7a45c;
   border-radius: 4px;
   color: #d4c4a8;
@@ -595,18 +609,18 @@ svg circle {
   font-size: 0.9em;
   width: max-content;
   max-width: 250px;
-  z-index: 100;
+  z-index: 1000;  /* Ensure tooltip is above everything */
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   pointer-events: none;
+  transition: opacity 0.3s, visibility 0s linear 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .tooltip::after {
   content: '';
   position: absolute;
-  top: 100%;
+  bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
   border-width: 8px;
@@ -614,9 +628,18 @@ svg circle {
   border-color: #c7a45c transparent transparent transparent;
 }
 
-.stats-grid li:hover .tooltip {
+.stats-grid li.show-tooltip .tooltip {
   opacity: 1;
   visibility: visible;
+  transition: opacity 0.3s, visibility 0s linear 0s;
+  animation: tooltipFadeOut 0.3s ease-in 5s forwards;
+}
+
+/* Prevent tooltip from showing on button interaction */
+.stat-buttons {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .bookmark-section {
@@ -696,4 +719,112 @@ svg circle {
 .use-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  #root {
+    padding: 0.5rem;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.8em;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .start-buttons {
+    flex-direction: column;
+    gap: 1em;
+  }
+
+  .investigator-grid {
+    grid-template-columns: 1fr;
+    gap: 1em;
+    padding: 1em;
+  }
+
+  .item-entry {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .item-entry button {
+    margin-top: 0.5em;
+    margin-left: 0;
+  }
+
+  .new-game-button {
+    position: static;
+    margin: 1rem auto;
+    width: 100%;
+    max-width: 300px;
+    display: block;
+  }
+
+  .form-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .form-buttons button {
+    width: 100%;
+  }
+
+  /* Improve touch targets */
+  button {
+    min-height: 44px;  /* Minimum touch target size */
+    padding: 0.8em 1.2em;
+  }
+
+  /* Improve input experience on mobile */
+  input {
+    font-size: 16px !important;  /* Prevent iOS zoom on focus */
+  }
+
+  .text-input, 
+  .form-group input {
+    padding: 0.8em;
+  }
+
+  /* Make tooltips touch-friendly */
+  .tooltip {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    width: auto;
+    min-width: 200px;
+    max-width: 90vw;
+  }
+
+  /* Adjust bookmark section for mobile */
+  .bookmark-section {
+    width: 90%;
+    padding: 1em;
+  }
+
+  .bookmark-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .bookmark-buttons button {
+    width: 100%;
+  }
+
+  /* Improve spacing for mobile */
+  .custom-investigator {
+    padding: 1em;
+  }
+
+  .add-list {
+    padding: 0.8em;
+  }
 }

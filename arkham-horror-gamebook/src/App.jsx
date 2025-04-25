@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import GameStart from './components/GameStart';
 
@@ -53,6 +53,7 @@ const App = () => {
     return savedPage ? parseInt(savedPage, 10) : 1;
   });
   const [showBookmarkForm, setShowBookmarkForm] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState(null);
 
   useEffect(() => {
     if (investigator) {
@@ -268,6 +269,24 @@ const App = () => {
     });
   };
 
+  const handleStatClick = useCallback((e, stat) => {
+    // Only show tooltip if clicking the stat container itself, not buttons
+    if (!e.target.closest('.stat-buttons')) {
+      if (stat === 'health' || stat === 'sanity') {
+        // Toggle tooltip: close if it's already showing for this stat
+        if (activeTooltip === stat) {
+          setActiveTooltip(null);
+        } else {
+          setActiveTooltip(stat);
+          // Auto-hide tooltip after 5 seconds
+          setTimeout(() => {
+            setActiveTooltip(null);
+          }, 5000);
+        }
+      }
+    }
+  }, [activeTooltip]);
+
   if (!gameStarted || !investigator) {
     return <GameStart onSelectInvestigator={handleSelectInvestigator} />;
   }
@@ -313,8 +332,10 @@ const App = () => {
         {Object.entries(investigator.stats).map(([stat, value]) => (
           <li 
             key={stat} 
+            onClick={(e) => handleStatClick(e, stat)}
             data-health-penalty={stat === 'combat' && investigator.stats.health < 0}
             data-sanity-penalty={stat === 'willpower' && investigator.stats.sanity < 0}
+            className={activeTooltip === stat ? 'show-tooltip' : ''}
           >
             <span className="stat-name">{stat.charAt(0).toUpperCase() + stat.slice(1)}</span>
             {(stat === 'health' || stat === 'sanity') && (
