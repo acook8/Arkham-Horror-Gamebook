@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Arkham-Horror-Gamebook/sw.js', { scope: '/Arkham-Horror-Gamebook/' })})}
